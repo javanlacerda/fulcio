@@ -27,43 +27,43 @@ type PreExtensions struct {
 
 	Issuer []string // OID 1.3.6.1.4.1.57264.1.8 and 1.3.6.1.4.1.57264.1.1 (Deprecated)
 
-	GithubWorkflowTrigger []string // OID 1.3.6.1.4.1.57264.1.2
+	GithubWorkflowTrigger []string `yaml:"github-workflow-trigger"` // OID 1.3.6.1.4.1.57264.1.2
 
-	GithubWorkflowSHA []string // OID 1.3.6.1.4.1.57264.1.3
+	GithubWorkflowSHA []string `yaml:"github-workflow-sha"` // OID 1.3.6.1.4.1.57264.1.3
 
-	GithubWorkflowName []string // OID 1.3.6.1.4.1.57264.1.4
+	GithubWorkflowName []string `yaml:"github-workflow-name"` // OID 1.3.6.1.4.1.57264.1.4
 
-	GithubWorkflowRepository []string // OID 1.3.6.1.4.1.57264.1.5
+	GithubWorkflowRepository []string `yaml:"github-workflow-repository"` // OID 1.3.6.1.4.1.57264.1.5
 
-	GithubWorkflowRef []string // 1.3.6.1.4.1.57264.1.6
+	GithubWorkflowRef []string `yaml:"github-workflow-ref"` // 1.3.6.1.4.1.57264.1.6
 
-	BuildSignerURI []string // 1.3.6.1.4.1.57264.1.9
+	BuildSignerURI []string `yaml:"build-signer-uri"` // 1.3.6.1.4.1.57264.1.9
 
-	BuildSignerDigest []string // 1.3.6.1.4.1.57264.1.10
+	BuildSignerDigest []string `yaml:"build-signer-digest"` // 1.3.6.1.4.1.57264.1.10
 
-	RunnerEnvironment []string // 1.3.6.1.4.1.57264.1.11
+	RunnerEnvironment []string `yaml:"runner-environment"` // 1.3.6.1.4.1.57264.1.11
 
-	SourceRepositoryURI []string // 1.3.6.1.4.1.57264.1.12
+	SourceRepositoryURI []string `yaml:"source-repository-uri"` // 1.3.6.1.4.1.57264.1.12
 
-	SourceRepositoryDigest []string // 1.3.6.1.4.1.57264.1.13
+	SourceRepositoryDigest []string `yaml:"source-repository-digest"` // 1.3.6.1.4.1.57264.1.13
 
-	SourceRepositoryRef []string // 1.3.6.1.4.1.57264.1.14
+	SourceRepositoryRef []string `yaml:"source-repository-ref"` // 1.3.6.1.4.1.57264.1.14
 
-	SourceRepositoryIdentifier []string // 1.3.6.1.4.1.57264.1.15
+	SourceRepositoryIdentifier []string `yaml:"source-repository-identifier"` // 1.3.6.1.4.1.57264.1.15
 
-	SourceRepositoryOwnerURI []string // 1.3.6.1.4.1.57264.1.16
+	SourceRepositoryOwnerURI []string `yaml:"source-repository-owner-uri"` // 1.3.6.1.4.1.57264.1.16
 
-	SourceRepositoryOwnerIdentifier []string // 1.3.6.1.4.1.57264.1.17
+	SourceRepositoryOwnerIdentifier []string `yaml:"source-repository-owner-identifier"` // 1.3.6.1.4.1.57264.1.17
 
-	BuildConfigURI []string // 1.3.6.1.4.1.57264.1.18
+	BuildConfigURI []string `yaml:"build-config-uri"` // 1.3.6.1.4.1.57264.1.18
 
-	BuildConfigDigest []string // 1.3.6.1.4.1.57264.1.19
+	BuildConfigDigest []string `yaml:"build-config-digest"` // 1.3.6.1.4.1.57264.1.19
 
-	BuildTrigger []string // 1.3.6.1.4.1.57264.1.20
+	BuildTrigger []string `yaml:"build-trigger"` // 1.3.6.1.4.1.57264.1.20
 
-	RunInvocationURI []string // 1.3.6.1.4.1.57264.1.21
+	RunInvocationURI []string `yaml:"run-invocation-uri"` // 1.3.6.1.4.1.57264.1.21
 
-	SourceRepositoryVisibilityAtSigning []string // 1.3.6.1.4.1.57264.1.22
+	SourceRepositoryVisibilityAtSigning []string `yaml:"source-repository-visibility-at-signing"` // 1.3.6.1.4.1.57264.1.22
 }
 
 type PreYaml struct {
