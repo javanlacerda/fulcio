@@ -1,49 +1,14 @@
 providers:
     github:
-        define: &url "https://github.com/"
-        fields:
-            - job_workflow_sha
-            - sha
-            - ref
-            - repository_id
-            - repository
-            - run_id
-            - run_attempt
-        build-signer-digest: 
-            - job_workflow_sha
-        source-repository-digest: 
-            - sha
-        source-repository-ref: 
-            - ref
-        source-repository-identifier: 
-            - repository_id
-        run-invocation-uri:
-            - *url
-            - repository
-            - "actions/runs"
-            - run_id
-            - "attempts"
-            - run_attempt
+        build-signer-digest: job_workflow_sha
+        source-repository-digest: sha
+        source-repository-ref: ref
+        source-repository-identifier: repository_id
+        run-invocation-uri: https://github.com/{{.repository}}/actions/runs/{{.run_id}}/
 
     gitlab:
-        define: &url "https://gitlab.com/"
-        fields:
-            - ci_config_sha
-            - sha
-            - ref
-            - project_id
-            - project_path
-            - job_id
-        build-signer-digest: 
-            - ci_config_sha
-        source-repository-digest: 
-            - sha
-        source-repository-ref: 
-            - ref
-        source-repository-identifier: 
-            - project_id
-        run-invocation-uri:
-            - *url
-            - project_path
-            - "/-/jobs/"
-            - job_id
+        build-signer-digest: ci_config_sha
+        source-repository-digest: sha
+        source-repository-ref: ref
+        source-repository-identifier: project_id
+        run-invocation-uri: "https://gitlab.com/{{.project_path}}/-/jobs/{{.job_id}}"
