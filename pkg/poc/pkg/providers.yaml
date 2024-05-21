@@ -11,4 +11,11 @@ providers:
         source-repository-digest: sha
         source-repository-ref: ref
         source-repository-identifier: project_id
-        run-invocation-uri: "https://gitlab.com/{{.project_path}}/-/jobs/{{.job_id}}"
+        run-invocation-uri: https://gitlab.com/{{.project_path}}/-/jobs/{{.job_id}}
+    codefresh:
+        build-signer-digest: build/{{.workflow_id}}
+        runner-environment: runner_environment
+        source-repository-uri: scm_repo_url
+        source-repository-ref: scm_ref
+        build-config-uri: api/pipelines/{{.pipeline_id}}
+        run-invocation-uri: build/{{.workflow_id}}

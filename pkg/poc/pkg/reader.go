@@ -22,6 +22,7 @@ import (
 	"html/template"
 	"log"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -54,14 +55,20 @@ type YamlLocal struct {
 }
 
 func ApplyTemplate(path string, data map[string]string) string {
-	var doc bytes.Buffer
-	t := template.New("")
-	p, err := t.Parse(path)
-	if err != nil {
-		panic(err)
+	// It checks it is a path or a raw field by
+	// checking exists template syntax into the string
+	if strings.Contains(path, "{{.") {
+		var doc bytes.Buffer
+		t := template.New("")
+		p, err := t.Parse(path)
+		if err != nil {
+			panic(err)
+		}
+		p.Execute(&doc, data)
+		return doc.String()
+	} else {
+		return data[path]
 	}
-	p.Execute(&doc, data)
-	return doc.String()
 }
 
 func main() {
@@ -78,12 +85,20 @@ func main() {
 	}
 
 	runData := map[string]string{
-		"repository":       "ossf/scorecard",
-		"run_id":           "123",
-		"run_attempt":      "345",
-		"job_workflow_sha": "1a2b3c",
-		"project_path":     "project/path",
-		"job_id":           "123",
+		"repository":         "ossf/scorecard",
+		"run_id":             "123",
+		"run_attempt":        "345",
+		"job_workflow_sha":   "1a2b3c",
+		"project_path":       "project/path",
+		"job_id":             "1233",
+		"workflow_id":        "123123",
+		"pipeline_id":        "321321",
+		"runner_environment": "staging",
+		"sha":                "3c2b1a",
+		"repository_id":      "1232321232",
+		"project_id":         "333333",
+		"scm_repo_url":       "scm/repo/url",
+		"scm_ref":            "scmref",
 	}
 
 	for k, v := range obj.Providers {
