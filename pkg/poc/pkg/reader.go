@@ -50,11 +50,18 @@ type Extensions struct {
 	SourceRepositoryVisibilityAtSigning string `yaml:"source-repository-visibility-at-signing"` // 1.3.6.1.4.1.57264.1.22
 }
 
-type YamlLocal struct {
-	Providers map[string]Extensions
+type RootYaml struct {
+	Providers map[string]Provider `yaml:"providers"`
+}
+
+type Provider struct {
+	extensions Extensions        `yaml:"extensions"`
+	uris       []string          `yaml:"uris"`
+	defaults   map[string]string `yaml:"defaults"`
 }
 
 func ApplyTemplate(path string, data map[string]string) string {
+
 	// It checks it is a path or a raw field by
 	// checking exists template syntax into the string
 	if strings.Contains(path, "{{.") {
@@ -64,7 +71,10 @@ func ApplyTemplate(path string, data map[string]string) string {
 		if err != nil {
 			panic(err)
 		}
-		p.Execute(&doc, data)
+		err = p.Execute(&doc, data)
+		if err != nil {
+			fmt.Println(err)
+		}
 		return doc.String()
 	} else {
 		return data[path]
@@ -72,10 +82,10 @@ func ApplyTemplate(path string, data map[string]string) string {
 }
 
 func main() {
-	var obj YamlLocal
+	var obj RootYaml
 
 	yamlFile, err := os.ReadFile("pkg/providers.yaml")
-
+	fmt.Printf("%v\n", yamlFile)
 	if err != nil {
 		fmt.Printf("yamlFile.Get err #%v ", err)
 	}
@@ -100,9 +110,10 @@ func main() {
 		"scm_repo_url":       "scm/repo/url",
 		"scm_ref":            "scmref",
 	}
-
-	for k, v := range obj.Providers {
-
+	fmt.Printf("%v\n", obj)
+	for _, provider := range obj.Providers {
+		v := provider.extensions
+		fmt.Printf("%v\n", provider)
 		extensions := Extensions{
 			Issuer:                              ApplyTemplate(v.Issuer, runData),
 			GithubWorkflowTrigger:               ApplyTemplate(v.GithubWorkflowTrigger, runData),
@@ -125,10 +136,9 @@ func main() {
 			RunInvocationURI:                    ApplyTemplate(v.RunInvocationURI, runData),
 			SourceRepositoryVisibilityAtSigning: ApplyTemplate(v.SourceRepositoryVisibilityAtSigning, runData),
 		}
-		obj.Providers[k] = extensions
+		var prettyJSON bytes.Buffer
+		inrec, _ := json.Marshal(extensions)
+		json.Indent(&prettyJSON, inrec, "", "\t")
+		log.Println(prettyJSON.String())
 	}
-	var prettyJSON bytes.Buffer
-	inrec, _ := json.Marshal(obj)
-	json.Indent(&prettyJSON, inrec, "", "\t")
-	log.Println(prettyJSON.String())
 }
