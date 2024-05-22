@@ -5,18 +5,22 @@ providers:
             source-repository-digest: sha
             source-repository-ref: ref
             source-repository-identifier: repository_id
-            run-invocation-uri: https://github.com/{{.repository}}/actions/runs/{{.run_id}}/
+            run-invocation-uri: "{{.url}}/{{.repository}}/actions/runs/{{.run_id}}/"
         uris:
-            - https://github.com/{{.job_workflow_ref}}
+            - "{{.url}}/{{.job_workflow_ref}}"
+        defaults:
+            url: https://github.com
     gitlab:
         extensions:
             build-signer-digest: ci_config_sha
             source-repository-digest: sha
             source-repository-ref: ref
             source-repository-identifier: project_id
-            run-invocation-uri: https://gitlab.com/{{.project_path}}/-/jobs/{{.job_id}}
+            run-invocation-uri: "{{.url}}/{{.project_path}}/-/jobs/{{.job_id}}"
         uris:
             - ci_config_ref_uri
+        defaults:
+            url: https://gitlab.com
     codefresh:
         extensions:
             build-signer-digest: build/{{.workflow_id}}
