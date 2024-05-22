@@ -51,16 +51,28 @@ type Extensions struct {
 }
 
 type RootYaml struct {
-	Providers map[string]Provider `yaml:"providers"`
+	Providers map[string]Provider
 }
 
 type Provider struct {
-	extensions Extensions        `yaml:"extensions"`
-	uris       []string          `yaml:"uris"`
-	defaults   map[string]string `yaml:"defaults"`
+	Extensions Extensions
+	Uris       []string
+	Defaults   map[string]string
 }
 
-func ApplyTemplate(path string, data map[string]string) string {
+func ApplyTemplate(path string, data map[string]string, defaultData map[string]string) string {
+
+	// Here we merge the data from was claimed by the id token with the
+	// default data provided by the yaml file.
+	// The order here matter because we want to override the default data
+	// with the claimed data.
+	mergedData := make(map[string]string)
+	for k, v := range defaultData {
+		mergedData[k] = v
+	}
+	for k, v := range data {
+		mergedData[k] = v
+	}
 
 	// It checks it is a path or a raw field by
 	// checking exists template syntax into the string
@@ -71,13 +83,13 @@ func ApplyTemplate(path string, data map[string]string) string {
 		if err != nil {
 			panic(err)
 		}
-		err = p.Execute(&doc, data)
+		err = p.Execute(&doc, mergedData)
 		if err != nil {
 			fmt.Println(err)
 		}
 		return doc.String()
 	} else {
-		return data[path]
+		return mergedData[path]
 	}
 }
 
@@ -85,7 +97,6 @@ func main() {
 	var obj RootYaml
 
 	yamlFile, err := os.ReadFile("pkg/providers.yaml")
-	fmt.Printf("%v\n", yamlFile)
 	if err != nil {
 		fmt.Printf("yamlFile.Get err #%v ", err)
 	}
@@ -109,36 +120,51 @@ func main() {
 		"project_id":         "333333",
 		"scm_repo_url":       "scm/repo/url",
 		"scm_ref":            "scmref",
+		"account_name":       "accountname1",
+		"pipeline_name":      "pipelinename1",
+		"account_id":         "111222",
+		"job_workflow_ref":   "refrefref",
+		"ci_config_ref_uri":  "refciconfigref",
 	}
-	fmt.Printf("%v\n", obj)
-	for _, provider := range obj.Providers {
-		v := provider.extensions
-		fmt.Printf("%v\n", provider)
-		extensions := Extensions{
-			Issuer:                              ApplyTemplate(v.Issuer, runData),
-			GithubWorkflowTrigger:               ApplyTemplate(v.GithubWorkflowTrigger, runData),
-			GithubWorkflowSHA:                   ApplyTemplate(v.GithubWorkflowSHA, runData),
-			GithubWorkflowName:                  ApplyTemplate(v.GithubWorkflowName, runData),
-			GithubWorkflowRepository:            ApplyTemplate(v.GithubWorkflowRepository, runData),
-			GithubWorkflowRef:                   ApplyTemplate(v.GithubWorkflowRef, runData),
-			BuildSignerURI:                      ApplyTemplate(v.BuildSignerURI, runData),
-			BuildConfigDigest:                   ApplyTemplate(v.BuildConfigDigest, runData),
-			RunnerEnvironment:                   ApplyTemplate(v.RunnerEnvironment, runData),
-			SourceRepositoryURI:                 ApplyTemplate(v.SourceRepositoryURI, runData),
-			SourceRepositoryDigest:              ApplyTemplate(v.SourceRepositoryDigest, runData),
-			SourceRepositoryRef:                 ApplyTemplate(v.SourceRepositoryRef, runData),
-			SourceRepositoryIdentifier:          ApplyTemplate(v.SourceRepositoryIdentifier, runData),
-			SourceRepositoryOwnerURI:            ApplyTemplate(v.SourceRepositoryOwnerURI, runData),
-			SourceRepositoryOwnerIdentifier:     ApplyTemplate(v.SourceRepositoryOwnerIdentifier, runData),
-			BuildConfigURI:                      ApplyTemplate(v.BuildConfigURI, runData),
-			BuildSignerDigest:                   ApplyTemplate(v.BuildSignerDigest, runData),
-			BuildTrigger:                        ApplyTemplate(v.BuildTrigger, runData),
-			RunInvocationURI:                    ApplyTemplate(v.RunInvocationURI, runData),
-			SourceRepositoryVisibilityAtSigning: ApplyTemplate(v.SourceRepositoryVisibilityAtSigning, runData),
+
+	finalObj := RootYaml{Providers: make(map[string]Provider)}
+	for k, provider := range obj.Providers {
+		e := provider.Extensions
+		d := provider.Defaults
+		finalExtensions := Extensions{
+			Issuer:                              ApplyTemplate(e.Issuer, runData, d),
+			GithubWorkflowTrigger:               ApplyTemplate(e.GithubWorkflowTrigger, runData, d),
+			GithubWorkflowSHA:                   ApplyTemplate(e.GithubWorkflowSHA, runData, d),
+			GithubWorkflowName:                  ApplyTemplate(e.GithubWorkflowName, runData, d),
+			GithubWorkflowRepository:            ApplyTemplate(e.GithubWorkflowRepository, runData, d),
+			GithubWorkflowRef:                   ApplyTemplate(e.GithubWorkflowRef, runData, d),
+			BuildSignerURI:                      ApplyTemplate(e.BuildSignerURI, runData, d),
+			BuildConfigDigest:                   ApplyTemplate(e.BuildConfigDigest, runData, d),
+			RunnerEnvironment:                   ApplyTemplate(e.RunnerEnvironment, runData, d),
+			SourceRepositoryURI:                 ApplyTemplate(e.SourceRepositoryURI, runData, d),
+			SourceRepositoryDigest:              ApplyTemplate(e.SourceRepositoryDigest, runData, d),
+			SourceRepositoryRef:                 ApplyTemplate(e.SourceRepositoryRef, runData, d),
+			SourceRepositoryIdentifier:          ApplyTemplate(e.SourceRepositoryIdentifier, runData, d),
+			SourceRepositoryOwnerURI:            ApplyTemplate(e.SourceRepositoryOwnerURI, runData, d),
+			SourceRepositoryOwnerIdentifier:     ApplyTemplate(e.SourceRepositoryOwnerIdentifier, runData, d),
+			BuildConfigURI:                      ApplyTemplate(e.BuildConfigURI, runData, d),
+			BuildSignerDigest:                   ApplyTemplate(e.BuildSignerDigest, runData, d),
+			BuildTrigger:                        ApplyTemplate(e.BuildTrigger, runData, d),
+			RunInvocationURI:                    ApplyTemplate(e.RunInvocationURI, runData, d),
+			SourceRepositoryVisibilityAtSigning: ApplyTemplate(e.SourceRepositoryVisibilityAtSigning, runData, d),
 		}
-		var prettyJSON bytes.Buffer
-		inrec, _ := json.Marshal(extensions)
-		json.Indent(&prettyJSON, inrec, "", "\t")
-		log.Println(prettyJSON.String())
+		finalUris := make([]string, len(provider.Uris)-1)
+		for _, val := range provider.Uris {
+			finalUris = append(finalUris, ApplyTemplate(val, runData, d))
+		}
+		provider := Provider{
+			Extensions: finalExtensions,
+			Uris:       finalUris,
+		}
+		finalObj.Providers[k] = provider
 	}
+	var prettyJSON bytes.Buffer
+	inrec, _ := json.Marshal(finalObj)
+	json.Indent(&prettyJSON, inrec, "", "\t")
+	log.Println(prettyJSON.String())
 }

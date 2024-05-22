@@ -8,7 +8,6 @@ providers:
             run-invocation-uri: https://github.com/{{.repository}}/actions/runs/{{.run_id}}/
         uris:
             - https://github.com/{{.job_workflow_ref}}
-
     gitlab:
         extensions:
             build-signer-digest: ci_config_sha
