@@ -270,6 +270,8 @@ func (fc *FulcioConfig) prepare() error {
 	return nil
 }
 
+// I would like to remove this completely, to be able to add or remove
+// oidc providers only by the config.yaml file.
 type IssuerType string
 
 const (
@@ -499,30 +501,31 @@ func validateAllowedDomain(subjectHostname, issuerHostname string) error {
 	return fmt.Errorf("hostname top-level and second-level domains do not match: %s, %s", subjectHostname, issuerHostname)
 }
 
-func issuerToChallengeClaim(issType IssuerType, challengeClaim string) string {
+func issuerToChallengeClaim(_ IssuerType, challengeClaim string) string {
 	if challengeClaim != "" {
 		return challengeClaim
 	}
-	switch issType {
-	case IssuerTypeBuildkiteJob:
-		return "sub"
-	case IssuerTypeGitLabPipeline:
-		return "sub"
-	case IssuerTypeEmail:
-		return "email"
-	case IssuerTypeGithubWorkflow:
-		return "sub"
-	case IssuerTypeCodefreshWorkflow:
-		return "sub"
-	case IssuerTypeKubernetes:
-		return "sub"
-	case IssuerTypeSpiffe:
-		return "sub"
-	case IssuerTypeURI:
-		return "sub"
-	case IssuerTypeUsername:
-		return "sub"
-	default:
-		return ""
-	}
+	return "sub"
+	// switch issType {
+	// case IssuerTypeBuildkiteJob:
+	// 	return "sub"
+	// case IssuerTypeGitLabPipeline:
+	// 	return "sub"
+	// case IssuerTypeEmail:
+	// 	return "email"
+	// case IssuerTypeGithubWorkflow:
+	// 	return "sub"
+	// case IssuerTypeCodefreshWorkflow:
+	// 	return "sub"
+	// case IssuerTypeKubernetes:
+	// 	return "sub"
+	// case IssuerTypeSpiffe:
+	// 	return "sub"
+	// case IssuerTypeURI:
+	// 	return "sub"
+	// case IssuerTypeUsername:
+	// 	return "sub"
+	// default:
+	// 	return ""
+	// }
 }
