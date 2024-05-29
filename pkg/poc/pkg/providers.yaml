@@ -21,6 +21,11 @@ providers:
             - ci_config_ref_uri
         defaults:
             url: https://gitlab.com
+        oidc-issuers:
+            - issuer-url: "https://token.actions.githubusercontent.com"
+              client-id: "sigstore"
+              type: "github-workflow"
+            
     codefresh:
         extensions:
             build-signer-digest: build/{{.workflow_id}}

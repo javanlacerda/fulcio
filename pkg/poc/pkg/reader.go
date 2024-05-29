@@ -54,10 +54,33 @@ type RootYaml struct {
 	Providers map[string]Provider
 }
 
+type OIDCIssuer struct {
+	// The expected issuer of an OIDC token
+	IssuerURL string `yaml:"issuer-url,omitempty"`
+	// The expected client ID of the OIDC token
+	ClientID string `yaml:"client-id"`
+	// Used to determine the subject of the certificate and if additional
+	// certificate values are needed
+	Type string `yaml:"type"`
+	// Optional, if the issuer is in a different claim in the OIDC token
+	IssuerClaim string `yaml:"issuer-claim,omitempty"`
+	// The domain that must be present in the subject for 'uri' issuer types
+	// Also used to create an email for 'username' issuer types
+	SubjectDomain string `yaml:"subject-domain,omitempty"`
+	// SPIFFETrustDomain specifies the trust domain that 'spiffe' issuer types
+	// issue ID tokens for. Tokens with a different trust domain will be
+	// rejected.
+	SPIFFETrustDomain string `yaml:"spiffe-trust-domain,omitempty"`
+	// Optional, the challenge claim expected for the issuer
+	// Set if using a custom issuer
+	ChallengeClaim string `yaml:"challenge-claim,omitempty"`
+}
+
 type Provider struct {
-	Extensions Extensions
-	Uris       []string
-	Defaults   map[string]string
+	Extensions  Extensions
+	Uris        []string
+	Defaults    map[string]string
+	OIDCIssuers []OIDCIssuer `yaml:"oidc-issuers,omitempty"`
 }
 
 func ApplyTemplate(path string, data map[string]string, defaultData map[string]string) string {
@@ -158,8 +181,9 @@ func main() {
 			finalUris = append(finalUris, ApplyTemplate(val, runData, d))
 		}
 		provider := Provider{
-			Extensions: finalExtensions,
-			Uris:       finalUris,
+			Extensions:  finalExtensions,
+			Uris:        finalUris,
+			OIDCIssuers: provider.OIDCIssuers,
 		}
 		finalObj.Providers[k] = provider
 	}
