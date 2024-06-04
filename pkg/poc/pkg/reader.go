@@ -81,6 +81,7 @@ type Provider struct {
 	Uris        []string
 	Defaults    map[string]string
 	OIDCIssuers []OIDCIssuer `yaml:"oidc-issuers,omitempty"`
+	MetaIssuers []OIDCIssuer `yaml:"meta-issuers,omitempty"`
 }
 
 func ApplyTemplate(path string, data map[string]string, defaultData map[string]string) string {
@@ -184,6 +185,7 @@ func main() {
 			Extensions:  finalExtensions,
 			Uris:        finalUris,
 			OIDCIssuers: provider.OIDCIssuers,
+			MetaIssuers: provider.MetaIssuers,
 		}
 		finalObj.Providers[k] = provider
 	}

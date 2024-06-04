@@ -10,6 +10,10 @@ providers:
             - "{{.url}}/{{.job_workflow_ref}}"
         defaults:
             url: https://github.com
+        meta-issuers:
+            - issuer-url: "https://token.actions.githubusercontent.com/*"
+              client-id: "sigstore"
+              type: "github-workflow"
     gitlab:
         extensions:
             build-signer-digest: ci_config_sha
