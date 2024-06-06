@@ -85,6 +85,8 @@ type OIDCIssuer struct {
 	// Optional, the challenge claim expected for the issuer
 	// Set if using a custom issuer
 	ChallengeClaim string `json:"ChallengeClaim,omitempty"`
+	// Defines that the issuer is for a ci provider
+	IsCiProvider bool `json:"IsCiProvider"`
 }
 
 func metaRegex(issuer string) (*regexp.Regexp, error) {
@@ -125,6 +127,7 @@ func (fc *FulcioConfig) GetIssuer(issuerURL string) (OIDCIssuer, bool) {
 				Type:          iss.Type,
 				IssuerClaim:   iss.IssuerClaim,
 				SubjectDomain: iss.SubjectDomain,
+				IsCiProvider:  iss.IsCiProvider,
 			}, true
 		}
 	}
@@ -204,7 +207,7 @@ func (fc *FulcioConfig) ToIssuers() []*fulciogrpc.OIDCIssuer {
 			Issuer:            &fulciogrpc.OIDCIssuer_IssuerUrl{IssuerUrl: cfgIss.IssuerURL},
 			Audience:          cfgIss.ClientID,
 			SpiffeTrustDomain: cfgIss.SPIFFETrustDomain,
-			ChallengeClaim:    issuerToChallengeClaim(cfgIss.Type, cfgIss.ChallengeClaim),
+			ChallengeClaim:    issuerToChallengeClaim(cfgIss, cfgIss.ChallengeClaim),
 		}
 		issuers = append(issuers, issuer)
 	}
@@ -214,7 +217,7 @@ func (fc *FulcioConfig) ToIssuers() []*fulciogrpc.OIDCIssuer {
 			Issuer:            &fulciogrpc.OIDCIssuer_WildcardIssuerUrl{WildcardIssuerUrl: metaIss},
 			Audience:          cfgIss.ClientID,
 			SpiffeTrustDomain: cfgIss.SPIFFETrustDomain,
-			ChallengeClaim:    issuerToChallengeClaim(cfgIss.Type, cfgIss.ChallengeClaim),
+			ChallengeClaim:    issuerToChallengeClaim(cfgIss, cfgIss.ChallengeClaim),
 		}
 		issuers = append(issuers, issuer)
 	}
@@ -372,7 +375,7 @@ func validateConfig(conf *FulcioConfig) error {
 			}
 		}
 
-		if issuerToChallengeClaim(issuer.Type, issuer.ChallengeClaim) == "" {
+		if issuerToChallengeClaim(issuer, issuer.ChallengeClaim) == "" {
 			return errors.New("issuer missing challenge claim")
 		}
 	}
@@ -384,7 +387,7 @@ func validateConfig(conf *FulcioConfig) error {
 			return errors.New("SPIFFE meta issuers not supported")
 		}
 
-		if issuerToChallengeClaim(metaIssuer.Type, metaIssuer.ChallengeClaim) == "" {
+		if issuerToChallengeClaim(metaIssuer, metaIssuer.ChallengeClaim) == "" {
 			return errors.New("issuer missing challenge claim")
 		}
 	}
@@ -501,31 +504,33 @@ func validateAllowedDomain(subjectHostname, issuerHostname string) error {
 	return fmt.Errorf("hostname top-level and second-level domains do not match: %s, %s", subjectHostname, issuerHostname)
 }
 
-func issuerToChallengeClaim(_ IssuerType, challengeClaim string) string {
+func issuerToChallengeClaim(iss OIDCIssuer, challengeClaim string) string {
 	if challengeClaim != "" {
 		return challengeClaim
 	}
-	return "sub"
-	// switch issType {
-	// case IssuerTypeBuildkiteJob:
-	// 	return "sub"
-	// case IssuerTypeGitLabPipeline:
-	// 	return "sub"
-	// case IssuerTypeEmail:
-	// 	return "email"
-	// case IssuerTypeGithubWorkflow:
-	// 	return "sub"
-	// case IssuerTypeCodefreshWorkflow:
-	// 	return "sub"
-	// case IssuerTypeKubernetes:
-	// 	return "sub"
-	// case IssuerTypeSpiffe:
-	// 	return "sub"
-	// case IssuerTypeURI:
-	// 	return "sub"
-	// case IssuerTypeUsername:
-	// 	return "sub"
-	// default:
-	// 	return ""
-	// }
+	if iss.IsCiProvider {
+		return "sub"
+	}
+	switch iss.Type {
+	case IssuerTypeBuildkiteJob:
+		return "sub"
+	case IssuerTypeGitLabPipeline:
+		return "sub"
+	case IssuerTypeEmail:
+		return "email"
+	case IssuerTypeGithubWorkflow:
+		return "sub"
+	case IssuerTypeCodefreshWorkflow:
+		return "sub"
+	case IssuerTypeKubernetes:
+		return "sub"
+	case IssuerTypeSpiffe:
+		return "sub"
+	case IssuerTypeURI:
+		return "sub"
+	case IssuerTypeUsername:
+		return "sub"
+	default:
+		return ""
+	}
 }

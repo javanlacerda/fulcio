@@ -17,7 +17,16 @@ package server
 import (
 	"github.com/sigstore/fulcio/pkg/config"
 	"github.com/sigstore/fulcio/pkg/identity"
+	"github.com/sigstore/fulcio/pkg/identity/buildkite"
+	"github.com/sigstore/fulcio/pkg/identity/codefresh"
+	"github.com/sigstore/fulcio/pkg/identity/email"
 	"github.com/sigstore/fulcio/pkg/identity/generic"
+	"github.com/sigstore/fulcio/pkg/identity/github"
+	"github.com/sigstore/fulcio/pkg/identity/gitlabcom"
+	"github.com/sigstore/fulcio/pkg/identity/kubernetes"
+	"github.com/sigstore/fulcio/pkg/identity/spiffe"
+	"github.com/sigstore/fulcio/pkg/identity/uri"
+	"github.com/sigstore/fulcio/pkg/identity/username"
 )
 
 func NewIssuerPool(cfg *config.FulcioConfig) identity.IssuerPool {
@@ -44,27 +53,29 @@ func getIssuer(meta string, i config.OIDCIssuer) identity.Issuer {
 		issuerURL = meta
 	}
 
-	return generic.Issuer(issuerURL)
-
-	// switch i.Type {
-	// case config.IssuerTypeEmail:
-	// 	return email.Issuer(issuerURL)
-	// case config.IssuerTypeGithubWorkflow:
-	// 	return github.Issuer(issuerURL)
-	// case config.IssuerTypeGitLabPipeline:
-	// 	return gitlabcom.Issuer(issuerURL)
-	// case config.IssuerTypeBuildkiteJob:
-	// 	return buildkite.Issuer(issuerURL)
-	// case config.IssuerTypeCodefreshWorkflow:
-	// 	return codefresh.Issuer(issuerURL)
-	// case config.IssuerTypeKubernetes:
-	// 	return kubernetes.Issuer(issuerURL)
-	// case config.IssuerTypeSpiffe:
-	// 	return spiffe.Issuer(issuerURL)
-	// case config.IssuerTypeURI:
-	// 	return uri.Issuer(issuerURL)
-	// case config.IssuerTypeUsername:
-	// 	return username.Issuer(issuerURL)
-	// }
-	// return nil
+	if i.IsCiProvider {
+		return generic.Issuer(issuerURL)
+	} else {
+		switch i.Type {
+		case config.IssuerTypeEmail:
+			return email.Issuer(issuerURL)
+		case config.IssuerTypeGithubWorkflow:
+			return github.Issuer(issuerURL)
+		case config.IssuerTypeGitLabPipeline:
+			return gitlabcom.Issuer(issuerURL)
+		case config.IssuerTypeBuildkiteJob:
+			return buildkite.Issuer(issuerURL)
+		case config.IssuerTypeCodefreshWorkflow:
+			return codefresh.Issuer(issuerURL)
+		case config.IssuerTypeKubernetes:
+			return kubernetes.Issuer(issuerURL)
+		case config.IssuerTypeSpiffe:
+			return spiffe.Issuer(issuerURL)
+		case config.IssuerTypeURI:
+			return uri.Issuer(issuerURL)
+		case config.IssuerTypeUsername:
+			return username.Issuer(issuerURL)
+		}
+	}
+	return nil
 }
