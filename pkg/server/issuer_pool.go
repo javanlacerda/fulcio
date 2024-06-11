@@ -52,7 +52,6 @@ func getIssuer(meta string, i config.OIDCIssuer) identity.Issuer {
 	if meta != "" {
 		issuerURL = meta
 	}
-
 	switch i.Type {
 	case config.IssuerTypeCiProvider:
 		return generic.Issuer(issuerURL)
@@ -74,7 +73,6 @@ func getIssuer(meta string, i config.OIDCIssuer) identity.Issuer {
 		return uri.Issuer(issuerURL)
 	case config.IssuerTypeUsername:
 		return username.Issuer(issuerURL)
-
 	}
 	return nil
 }

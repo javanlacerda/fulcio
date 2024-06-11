@@ -205,7 +205,7 @@ func (fc *FulcioConfig) ToIssuers() []*fulciogrpc.OIDCIssuer {
 			Issuer:            &fulciogrpc.OIDCIssuer_IssuerUrl{IssuerUrl: cfgIss.IssuerURL},
 			Audience:          cfgIss.ClientID,
 			SpiffeTrustDomain: cfgIss.SPIFFETrustDomain,
-			ChallengeClaim:    issuerToChallengeClaim(cfgIss, cfgIss.ChallengeClaim),
+			ChallengeClaim:    issuerToChallengeClaim(cfgIss.Type, cfgIss.ChallengeClaim),
 		}
 		issuers = append(issuers, issuer)
 	}
@@ -215,7 +215,7 @@ func (fc *FulcioConfig) ToIssuers() []*fulciogrpc.OIDCIssuer {
 			Issuer:            &fulciogrpc.OIDCIssuer_WildcardIssuerUrl{WildcardIssuerUrl: metaIss},
 			Audience:          cfgIss.ClientID,
 			SpiffeTrustDomain: cfgIss.SPIFFETrustDomain,
-			ChallengeClaim:    issuerToChallengeClaim(cfgIss, cfgIss.ChallengeClaim),
+			ChallengeClaim:    issuerToChallengeClaim(cfgIss.Type, cfgIss.ChallengeClaim),
 		}
 		issuers = append(issuers, issuer)
 	}
@@ -374,7 +374,7 @@ func validateConfig(conf *FulcioConfig) error {
 			}
 		}
 
-		if issuerToChallengeClaim(issuer, issuer.ChallengeClaim) == "" {
+		if issuerToChallengeClaim(issuer.Type, issuer.ChallengeClaim) == "" {
 			return errors.New("issuer missing challenge claim")
 		}
 	}
@@ -386,7 +386,7 @@ func validateConfig(conf *FulcioConfig) error {
 			return errors.New("SPIFFE meta issuers not supported")
 		}
 
-		if issuerToChallengeClaim(metaIssuer, metaIssuer.ChallengeClaim) == "" {
+		if issuerToChallengeClaim(metaIssuer.Type, metaIssuer.ChallengeClaim) == "" {
 			return errors.New("issuer missing challenge claim")
 		}
 	}
@@ -503,12 +503,12 @@ func validateAllowedDomain(subjectHostname, issuerHostname string) error {
 	return fmt.Errorf("hostname top-level and second-level domains do not match: %s, %s", subjectHostname, issuerHostname)
 }
 
-func issuerToChallengeClaim(iss OIDCIssuer, challengeClaim string) string {
+func issuerToChallengeClaim(issType IssuerType, challengeClaim string) string {
 	if challengeClaim != "" {
 		return challengeClaim
 	}
 
-	switch iss.Type {
+	switch issType {
 	case IssuerTypeBuildkiteJob:
 		return "sub"
 	case IssuerTypeGitLabPipeline:
