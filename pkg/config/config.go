@@ -504,7 +504,6 @@ func issuerToChallengeClaim(issType IssuerType, challengeClaim string) string {
 	if challengeClaim != "" {
 		return challengeClaim
 	}
-
 	switch issType {
 	case IssuerTypeBuildkiteJob:
 		return "sub"
