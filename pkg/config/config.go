@@ -126,7 +126,6 @@ func (fc *FulcioConfig) GetIssuer(issuerURL string) (OIDCIssuer, bool) {
 				Type:          iss.Type,
 				IssuerClaim:   iss.IssuerClaim,
 				SubjectDomain: iss.SubjectDomain,
-				IsCiProvider:  iss.IsCiProvider,
 			}, true
 		}
 	}
@@ -284,6 +283,7 @@ const (
 	IssuerTypeSpiffe            = "spiffe"
 	IssuerTypeURI               = "uri"
 	IssuerTypeUsername          = "username"
+	IssuerTypeCiProvider        = "ci-provider"
 )
 
 func parseConfig(b []byte) (cfg *FulcioConfig, err error) {
@@ -507,9 +507,7 @@ func issuerToChallengeClaim(iss OIDCIssuer, challengeClaim string) string {
 	if challengeClaim != "" {
 		return challengeClaim
 	}
-	if iss.IsCiProvider {
-		return "sub"
-	}
+
 	switch iss.Type {
 	case IssuerTypeBuildkiteJob:
 		return "sub"
