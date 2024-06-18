@@ -24,13 +24,16 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	lru "github.com/hashicorp/golang-lru"
+	"github.com/sigstore/fulcio/pkg/certificate"
 	fulciogrpc "github.com/sigstore/fulcio/pkg/generated/protobuf"
 	"github.com/sigstore/fulcio/pkg/log"
 	"github.com/spiffe/go-spiffe/v2/spiffeid"
@@ -73,7 +76,9 @@ type OIDCIssuer struct {
 	ClientID string `json:"ClientID" yaml:"client-id,omitempty"`
 	// Used to determine the subject of the certificate and if additional
 	// certificate values are needed
-	Type IssuerType `json:"Type" yaml:"type,omitempty"`
+	Type IssuerType `json:"Type,omitempty" yaml:"type,omitempty"`
+	// The mapping for the issuer claims to the expected Extensions
+	CIProviderClaimsMapping certificate.Extensions `json:"ClaimsMapping,omitempty" yaml:"claims-mapping,omitempty"`
 	// Optional, if the issuer is in a different claim in the OIDC token
 	IssuerClaim string `json:"IssuerClaim,omitempty" yaml:"issuer-claim,omitempty"`
 	// The domain that must be present in the subject for 'uri' issuer types
@@ -101,6 +106,16 @@ func metaRegex(issuer string) (*regexp.Regexp, error) {
 
 	// Compile into a regular expression.
 	return regexp.Compile(replaced)
+}
+
+type Config struct {
+	Providers map[string]Provider
+}
+type Provider struct {
+	SubjectAlternativeName string            `yaml:"subject-alternative-name,omitempty"`
+	Defaults               map[string]string `yaml:"defaults,omitempty"`
+	OIDCIssuers            []OIDCIssuer      `yaml:"oidc-issuers,omitempty"`
+	MetaIssuers            []OIDCIssuer      `yaml:"meta-issuers,omitempty"`
 }
 
 // GetIssuer looks up the issuer configuration for an `issuerURL`
@@ -283,6 +298,7 @@ const (
 	IssuerTypeSpiffe            = "spiffe"
 	IssuerTypeURI               = "uri"
 	IssuerTypeUsername          = "username"
+	IssuerCiProvider            = "ci-provider"
 )
 
 func parseConfig(b []byte) (cfg *FulcioConfig, err error) {
@@ -445,7 +461,33 @@ func Load(configPath string) (*FulcioConfig, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read file: %w", err)
 	}
-	return Read(b)
+	config, err := Read(b)
+	if err != nil {
+		return config, err
+	}
+
+	var obj Config
+	_, path, _, _ := runtime.Caller(0)
+	basepath := filepath.Dir(path)
+	configFile, err := os.ReadFile(basepath + "/providers_config.yaml")
+	if err != nil {
+		fmt.Printf("yamlFile.Get err #%v ", err)
+	}
+	err = yaml.Unmarshal(configFile, &obj)
+	if err != nil {
+		fmt.Printf("Unmarshal: %v", err)
+	}
+	for _, v := range obj.Providers {
+		for _, issuer := range v.OIDCIssuers {
+			issuer.Type = "ci-provider"
+			config.OIDCIssuers[issuer.IssuerURL] = issuer
+		}
+		for _, issuer := range v.MetaIssuers {
+			config.MetaIssuers[issuer.IssuerURL] = issuer
+		}
+	}
+
+	return config, err
 }
 
 // Read parses the bytes of a config
@@ -524,6 +566,8 @@ func issuerToChallengeClaim(issType IssuerType, challengeClaim string) string {
 	case IssuerTypeURI:
 		return "sub"
 	case IssuerTypeUsername:
+		return "sub"
+	case IssuerCiProvider:
 		return "sub"
 	default:
 		return ""
