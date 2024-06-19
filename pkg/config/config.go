@@ -563,6 +563,7 @@ func validateAllowedDomain(subjectHostname, issuerHostname string) error {
 }
 
 func issuerToChallengeClaim(issType IssuerType, challengeClaim string) string {
+
 	if challengeClaim != "" {
 		return challengeClaim
 	}

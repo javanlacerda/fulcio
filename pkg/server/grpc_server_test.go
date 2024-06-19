@@ -43,6 +43,7 @@ import (
 	"github.com/google/certificate-transparency-go/jsonclient"
 	"github.com/sigstore/fulcio/pkg/ca"
 	"github.com/sigstore/fulcio/pkg/ca/ephemeralca"
+	"github.com/sigstore/fulcio/pkg/certificate"
 	"github.com/sigstore/fulcio/pkg/config"
 	"github.com/sigstore/fulcio/pkg/generated/protobuf"
 	"github.com/sigstore/fulcio/pkg/identity"
@@ -223,7 +224,7 @@ func TestGetConfiguration(t *testing.T) {
 			%q: {
 				"IssuerURL": %q,
 				"ClientID": "sigstore",
-				"Type": "github-workflow"
+				"Type": "ci-provider"
 			},
 			%q: {
 				"IssuerURL": %q,
@@ -367,7 +368,7 @@ func TestGetConfigurationFromYaml(t *testing.T) {
       %v:
         issuer-url: %q
         client-id: sigstore
-        type: github-workflow
+        type: ci-provider
       %v:
         issuer-url: %q
         client-id: sigstore
@@ -962,7 +963,8 @@ func TestAPIWithGitHub(t *testing.T) {
 			%q: {
 				"IssuerURL": %q,
 				"ClientID": "sigstore",
-				"Type": "ci-provider"
+				"Type": "ci-provider",
+				"SubType": "github-workflow"
 			}
         }
 	}`, githubIssuer, githubIssuer)))
@@ -1004,6 +1006,36 @@ func TestAPIWithGitHub(t *testing.T) {
 
 	ctClient, eca := createCA(cfg, t)
 	ctx := context.Background()
+	cfg.IssuersMetadata = make(map[string]config.IssuersMetadata)
+	cfg.IssuersMetadata["github-workflow"] = config.IssuersMetadata{
+		ClaimsMapper: certificate.Extensions{
+			Issuer:                              "issuer",
+			GithubWorkflowTrigger:               "event_name",
+			GithubWorkflowSHA:                   "sha",
+			GithubWorkflowName:                  "workflow",
+			GithubWorkflowRepository:            "repository",
+			GithubWorkflowRef:                   "ref",
+			BuildSignerURI:                      "{{ .url }}/{{ .job_workflow_ref }}",
+			BuildSignerDigest:                   "job_workflow_sha",
+			RunnerEnvironment:                   "runner_environment",
+			SourceRepositoryURI:                 "{{ .url }}/{{ .repository }}",
+			SourceRepositoryDigest:              "sha",
+			SourceRepositoryRef:                 "ref",
+			SourceRepositoryIdentifier:          "repository_id",
+			SourceRepositoryOwnerURI:            "{{ .url }}/{{ .repository_owner }}",
+			SourceRepositoryOwnerIdentifier:     "repository_owner_id",
+			BuildConfigURI:                      "{{ .url }}/{{ .workflow_ref }}",
+			BuildConfigDigest:                   "workflow_sha",
+			BuildTrigger:                        "event_name",
+			RunInvocationURI:                    "{{ .url }}/{{ .repository }}/actions/runs/{{ .run_id }}/attempts/{{ .run_attempt }}",
+			SourceRepositoryVisibilityAtSigning: "repository_visibility",
+		},
+		Defaults: map[string]string{
+			"url": "https://github.com",
+		},
+		SubjectAlternativeName: "{{.url}}/{{.job_workflow_ref}}",
+	}
+
 	server, conn := setupGRPCForTest(ctx, t, cfg, ctClient, eca)
 	defer func() {
 		server.Stop()

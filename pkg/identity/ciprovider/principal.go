@@ -100,6 +100,7 @@ func (p Config) Embed(_ context.Context, cert *x509.Certificate) error {
 	if err := p.Token.Claims(&rawClaims); err != nil {
 		return err
 	}
+
 	claims := claimsToString(rawClaims)
 
 	subjectAlternativeNameURL, err := url.Parse(applyTemplateOrReplace(p.Metadata.SubjectAlternativeName, claims, defaults))
@@ -109,10 +110,9 @@ func (p Config) Embed(_ context.Context, cert *x509.Certificate) error {
 	uris := []*url.URL{subjectAlternativeNameURL}
 	// Set workflow ref URL to SubjectAlternativeName on certificate
 	cert.URIs = uris
-
 	// Embed additional information into custom extensions
 	cert.ExtraExtensions, err = certificate.Extensions{
-		Issuer:                              applyTemplateOrReplace(e.Issuer, claims, defaults),
+		Issuer:                              p.Token.Issuer,
 		GithubWorkflowTrigger:               applyTemplateOrReplace(e.GithubWorkflowTrigger, claims, defaults),
 		GithubWorkflowSHA:                   applyTemplateOrReplace(e.GithubWorkflowSHA, claims, defaults),
 		GithubWorkflowName:                  applyTemplateOrReplace(e.GithubWorkflowName, claims, defaults),
