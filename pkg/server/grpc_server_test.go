@@ -962,7 +962,7 @@ func TestAPIWithGitHub(t *testing.T) {
 			%q: {
 				"IssuerURL": %q,
 				"ClientID": "sigstore",
-				"Type": "github-workflow"
+				"Type": "ci-provider"
 			}
         }
 	}`, githubIssuer, githubIssuer)))

@@ -32,7 +32,7 @@ import (
 func claimsToString(claims map[string]interface{}) map[string]string {
 	stringClaims := make(map[string]string)
 	for k, v := range claims {
-		stringClaims[k] = v.(string)
+		stringClaims[k] = fmt.Sprintf("%v", v)
 	}
 	return stringClaims
 }

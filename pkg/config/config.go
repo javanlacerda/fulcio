@@ -290,7 +290,6 @@ type IssuerType string
 const (
 	IssuerTypeBuildkiteJob      = "buildkite-job"
 	IssuerTypeEmail             = "email"
-	IssuerTypeGithubWorkflow    = "github-workflow"
 	IssuerTypeCodefreshWorkflow = "codefresh-workflow"
 	IssuerTypeGitLabPipeline    = "gitlab-pipeline"
 	IssuerTypeKubernetes        = "kubernetes"
@@ -420,11 +419,6 @@ var DefaultConfig = &FulcioConfig{
 			IssuerURL: "https://accounts.google.com",
 			ClientID:  "sigstore",
 			Type:      IssuerTypeEmail,
-		},
-		"https://token.actions.githubusercontent.com": {
-			IssuerURL: "https://token.actions.githubusercontent.com",
-			ClientID:  "sigstore",
-			Type:      IssuerTypeGithubWorkflow,
 		},
 	},
 }
@@ -579,8 +573,6 @@ func issuerToChallengeClaim(issType IssuerType, challengeClaim string) string {
 		return "sub"
 	case IssuerTypeEmail:
 		return "email"
-	case IssuerTypeGithubWorkflow:
-		return "sub"
 	case IssuerTypeCiProvider:
 		return "sub"
 	case IssuerTypeCodefreshWorkflow:

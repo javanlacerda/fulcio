@@ -21,8 +21,8 @@ import (
 	"github.com/sigstore/fulcio/pkg/config"
 	"github.com/sigstore/fulcio/pkg/identity"
 	"github.com/sigstore/fulcio/pkg/identity/base"
+	"github.com/sigstore/fulcio/pkg/identity/ciprovider"
 	"github.com/sigstore/fulcio/pkg/identity/email"
-	"github.com/sigstore/fulcio/pkg/identity/github"
 	"github.com/sigstore/fulcio/pkg/identity/kubernetes"
 	"github.com/sigstore/fulcio/pkg/identity/spiffe"
 	"github.com/sigstore/fulcio/pkg/identity/uri"
@@ -90,9 +90,9 @@ func TestGetIssuer(t *testing.T) {
 			description: "github",
 			issuer: config.OIDCIssuer{
 				IssuerURL: "github.com",
-				Type:      "github-workflow",
+				Type:      "ci-provider",
 			},
-			expected: github.Issuer("github.com"),
+			expected: ciprovider.Issuer("github.com"),
 		}, {
 			description: "spiffe",
 			issuer: config.OIDCIssuer{
