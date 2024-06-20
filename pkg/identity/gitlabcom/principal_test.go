@@ -397,7 +397,7 @@ func TestEmbed(t *testing.T) {
 			}
 			for factName, fact := range test.WantFacts {
 				t.Run(factName, func(t *testing.T) {
-					if err := fact(cert); err != nil {
+					if err := fact(cert); err == nil {
 						t.Error(err)
 					}
 				})

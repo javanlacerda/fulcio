@@ -41,3 +41,26 @@ providers:
               client-id: sigstore
               contact: tac@sigstore.dev
               description: "GitHub Actions OIDC auth"
+    gitlab-pipeline:
+        extensions:
+            build-signer-uri: "{{.url}}/{{.job_workflow_ref}}"
+            build-signer-digest: job_workflow_sha
+            runner-environment: runner_environment
+            source-repository-uri: "{{.url}}/{{.repository}}"
+            source-repository-digest: sha
+            source-repository-ref: ref
+            source-repository-identifier: repository_id
+            source-repository-owner-uri: "{{.url}}/{{.repository_owner}}"
+            source-repository-owner-identifier: repository_owner_id
+            build-config-uri: "{{.url}}/{{.workflow_ref}}"
+            build-config-digest: workflow_sha
+            build-trigger: event_name
+            run-invocation-uri: "{{.url}}/{{.repository}}/actions/runs/{{.run_id}}/attempts/{{.run_attempt}}"
+            source-repository-visibility-at-signing: repository_visibility
+        defaults:
+            url: https://gitlab.com/
+        oidc-issuers:
+            - issuer-url: https://dev.gitlab.org
+              client-id: sigstore
+              contact: distribution-be@gitlab.com
+              description: "GitLab OIDC tokens for job identity"

@@ -48,12 +48,6 @@ data:
               "Type": "email",
               "SubType": ""
             },
-            "https://dev.gitlab.org": {
-              "IssuerURL": "https://dev.gitlab.org",
-              "ClientID": "sigstore",
-              "Type": "gitlab-pipeline",
-              "SubType": ""
-            },
             "https://gitlab.archlinux.org": {
               "IssuerURL": "https://gitlab.archlinux.org",
               "ClientID": "sigstore",

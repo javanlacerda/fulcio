@@ -198,11 +198,13 @@ func (p jobPrincipal) Embed(_ context.Context, cert *x509.Certificate) error {
 		return err
 	}
 
+	fmt.Printf("%v\n", p.ciConfigRefURI)
 	// ci_config_ref_uri claim is a URI that does not include protocol scheme so we need to normalize it
 	ciConfigRefURL, err := url.Parse(p.ciConfigRefURI)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("%v\n", ciConfigRefURL.String())
 
 	// default to https
 	ciConfigRefURL.Scheme = "https"
@@ -211,7 +213,7 @@ func (p jobPrincipal) Embed(_ context.Context, cert *x509.Certificate) error {
 	if baseURL.Host == ciConfigRefURL.Host {
 		ciConfigRefURL.Scheme = baseURL.Scheme
 	}
-
+	fmt.Printf("%v\n", ciConfigRefURL.String())
 	// Set workflow ref URL to SubjectAlternativeName on certificate
 	cert.URIs = []*url.URL{ciConfigRefURL}
 
