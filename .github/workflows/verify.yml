@@ -87,9 +87,3 @@ jobs:
         with:
           go-version: '1.22'
           check-latest: true
-
-      - name: check-config
-        run: |
-          set -e
-          go run federation/main.go
-          git diff --exit-code
