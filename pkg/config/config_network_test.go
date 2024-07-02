@@ -29,7 +29,7 @@ import (
 
 func TestLoad(t *testing.T) {
 	td := t.TempDir()
-	cfgPath := filepath.Join(td, "config.json")
+	cfgPath := filepath.Join(td, "config.yaml")
 	if err := os.WriteFile(cfgPath, []byte(validCfg), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestLoadDefaults(t *testing.T) {
 	td := t.TempDir()
 
 	// Don't put anything here!
-	cfgPath := filepath.Join(td, "config.json")
+	cfgPath := filepath.Join(td, "config.yaml")
 	cfg, err := Load(cfgPath)
 	if err != nil {
 		t.Fatal(err)
