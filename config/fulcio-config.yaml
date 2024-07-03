@@ -14,7 +14,7 @@
 # limitations under the License.
 apiVersion: v1
 data:
-    config.yaml: |-
+    config.yaml: |
         oidc-issuers:
             https://accounts.google.com:
                 issuer-url: https://accounts.google.com
@@ -112,7 +112,7 @@ data:
             https://token.actions.githubusercontent.com/*:
                 client-id: sigstore
                 type: github-workflow
-    server.yaml: |-
+    server.yaml: |
         host: 0.0.0.0
         port: 5555
         grpc-port: 5554
