@@ -87,3 +87,8 @@ jobs:
         with:
           go-version: '1.22'
           check-latest: true
+
+      - name: check-config
+        run: |
+          set -e
+          go test -timeout 30s -run ^TestLoadFulcioConfig$ github.com/sigstore/fulcio/pkg/config

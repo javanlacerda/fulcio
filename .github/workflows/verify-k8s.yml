@@ -124,7 +124,7 @@ jobs:
             name: fulcio-config
             namespace: fulcio-system
           data:
-            config.json: |-
+            config.yaml: |-
               {
                 ${{ matrix.issuer-config }}
               }
