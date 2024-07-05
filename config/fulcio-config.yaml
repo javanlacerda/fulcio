@@ -15,6 +15,7 @@
 apiVersion: v1
 data:
     config.yaml: |
+        define: &github-type "github-workflow"
         oidc-issuers:
             https://accounts.google.com:
                 issuer-url: https://accounts.google.com
@@ -93,7 +94,8 @@ data:
             https://token.actions.githubusercontent.com:
                 issuer-url: https://token.actions.githubusercontent.com
                 client-id: sigstore
-                type: github-workflow
+                type: ci-provider
+                ci-provider: *github-type
                 contact: tac@sigstore.dev
                 description: "GitHub Actions OIDC auth"
         meta-issuers:
@@ -111,7 +113,33 @@ data:
                 type: kubernetes
             https://token.actions.githubusercontent.com/*:
                 client-id: sigstore
-                type: github-workflow
+                type: ci-provider
+                ci-provider: *github-type
+        ci-issuer-metadata:
+            *github-type:
+                default-template-values:
+                    url: "https://github.com"
+                extension-templates: 
+                    github-workflow-trigger: "event_name"
+                    github-workflow-sha: "sha"
+                    github-workflow-name: "workflow"
+                    github-workflow-repository: "repository"
+                    github-workflow-ref: "ref"
+                    build-signer-uri: "{{ .url }}/{{ .job_workflow_ref }}"
+                    build-signer-digest: "job_workflow_sha"
+                    runner-environment: "runner_environment"
+                    source-repository-uri: "{{ .url }}/{{ .repository }}"
+                    source-repository-digest: "sha"
+                    source-repository-ref: "ref"
+                    source-repository-identifier: "repository_id"
+                    source-repository-owner-uri: "{{ .url }}/{{ .repository_owner }}"
+                    source-repository-owner-identifier: "repository_owner_id"
+                    build-config-uri: "{{ .url }}/{{ .workflow_ref }}"
+                    build-config-digest: "workflow_sha"
+                    build-trigger: "event_name"
+                    run-invocation-uri: "{{ .url }}/{{ .repository }}/actions/runs/{{ .run_id }}/attempts/{{ .run_attempt }}"
+                    source-repository-visibility-at-signing: "repository_visibility"
+                subject-alternative-name-template: "{{ .url }}/{{ .job_workflow_ref }}"
     server.yaml: |
         host: 0.0.0.0
         port: 5555

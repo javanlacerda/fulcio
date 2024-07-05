@@ -69,6 +69,11 @@ func TestLoadFulcioConfig(t *testing.T) {
 		if got.Contact == "" {
 			t.Errorf("Issuer Email should not be empty")
 		}
+		if got.Type == IssuerTypeCIProvider {
+			if got.CIProvider == "" {
+				t.Errorf("CIProvider should not be empty when Issuer type is ci-provider")
+			}
+		}
 		if _, ok := fulcioConfig.GetIssuer("not_an_issuer"); ok {
 			t.Error("no error returned from an unconfigured issuer")
 		}
@@ -77,6 +82,11 @@ func TestLoadFulcioConfig(t *testing.T) {
 	for _, metaIssuer := range fulcioConfig.MetaIssuers {
 		if metaIssuer.ClientID != "sigstore" {
 			t.Errorf("expected sigstore, got %s", metaIssuer.ClientID)
+		}
+		if metaIssuer.Type == IssuerTypeCIProvider {
+			if metaIssuer.CIProvider == "" {
+				t.Errorf("CIProvider should not be empty when Issuer type is ci-provider")
+			}
 		}
 	}
 }
