@@ -229,9 +229,11 @@ func TestApplyTemplateOrReplace(t *testing.T) {
 		"workflow":              "foo",
 		"workflow_ref":          "sigstore/other/.github/workflows/foo.yaml@refs/heads/main",
 		"workflow_sha":          "example-sha-other",
+		"workflow_id":           "1",
 	}
 	issuerMetadata := map[string]string{
-		"url": "https://github.com",
+		"url":                  "https://github.com",
+		"default_platform_url": "https://g.codefresh.io",
 	}
 
 	tests := map[string]struct {
@@ -252,12 +254,12 @@ func TestApplyTemplateOrReplace(t *testing.T) {
 		`Missing key for template`: {
 			Template:       "{{ .foo }}",
 			ExpectedResult: "",
-			ExpectErr:      true,
+			ExpectErr:      false,
 		},
 		`Empty string`: {
 			Template:       "",
 			ExpectedResult: "",
-			ExpectErr:      true,
+			ExpectErr:      false,
 		},
 		`Replaceable string`: {
 			Template:       "job_workflow_ref",
@@ -267,7 +269,17 @@ func TestApplyTemplateOrReplace(t *testing.T) {
 		`Missing string`: {
 			Template:       "bar",
 			ExpectedResult: "",
-			ExpectErr:      true,
+			ExpectErr:      false,
+		},
+		`If else template`: {
+			Template:       "{{if .platform_url}}{{.platform_ur}}{{ else }}{{.default_platform_url}}{{end}}/build/{{ .workflow_id }}",
+			ExpectedResult: "https://g.codefresh.io/build/1",
+			ExpectErr:      false,
+		},
+		`If else template using else condition`: {
+			Template:       "{{if .iss}}{{.iss}}{{ else }}{{.default_platform_url}}{{end}}/build/{{ .workflow_id }}",
+			ExpectedResult: "https://token.actions.githubusercontent.com/build/1",
+			ExpectErr:      false,
 		},
 	}
 
@@ -279,8 +291,8 @@ func TestApplyTemplateOrReplace(t *testing.T) {
 					test.ExpectedResult, res)
 			}
 			if (err != nil) != test.ExpectErr {
-				t.Errorf("should raise an error don't matches: Expected %v, received: %v",
-					test.ExpectErr, err != nil)
+				t.Errorf("should raise an error don't matches: Expected %v, received: %v, %v",
+					test.ExpectErr, err != nil, name)
 			}
 		})
 	}
