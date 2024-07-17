@@ -15,6 +15,7 @@
 define:
   - &github-type "github-workflow"
   - &gitlab-type "gitlab-pipeline"
+  - &codefresh-type "codefresh-workflow"
 oidc-issuers:
   https://accounts.google.com:
     issuer-url: https://accounts.google.com
@@ -78,7 +79,8 @@ oidc-issuers:
   https://oidc.codefresh.io:
     issuer-url: https://oidc.codefresh.io
     client-id: sigstore
-    type: codefresh-workflow
+    type: ci-provider
+    ci-provider: *codefresh-type
     contact: support@codefresh.io
     description: "Codefresh OIDC tokens for job identity"
   https://ops.gitlab.net:
@@ -156,3 +158,22 @@ ci-issuer-metadata:
         run-invocation-uri: "{{ .url }}/{{ .project_path }}/-/jobs/{{ .job_id }}"
         source-repository-visibility-at-signing: "repository_visibility"
     subject-alternative-name-template: "https://{{ .ci_config_ref_uri }}"
+  *codefresh-type:
+    default-template-values:
+        url: "https://g.codefresh.io"
+    extension-templates:
+        build-signer-uri: "https://{{ .ci_config_ref_uri }}"
+        build-signer-digest: "ci_config_sha"
+        runner-environment: "runner_environment"
+        source-repository-uri: "{{ .url }}/{{ .repository }}"
+        source-repository-digest: "sha"
+        source-repository-ref: "ref"
+        source-repository-identifier: "project_id"
+        source-repository-owner-uri: "{{ .url }}/{{ .namespace_path }}"
+        source-repository-owner-identifier: "namespace_id"
+        build-config-uri: "https://{{ .ci_config_ref_uri }}"
+        build-config-digest: "ci_config_sha"
+        build-trigger: "pipeline_source"
+        run-invocation-uri: "{{ .url }}/{{ .project_path }}/-/jobs/{{ .job_id }}"
+        source-repository-visibility-at-signing: "repository_visibility"
+    subject-alternative-name-template: "{{ .url }}/{{ .account_name }}/{{ .pipeline_name }}:{{ .account_id }}/{{ .pipeline_id }}"
