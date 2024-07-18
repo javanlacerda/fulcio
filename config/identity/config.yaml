@@ -16,6 +16,7 @@ define:
   - &github-type "github-workflow"
   - &gitlab-type "gitlab-pipeline"
   - &codefresh-type "codefresh-workflow"
+  - &buildkite-type "buildkite-job"
 oidc-issuers:
   https://accounts.google.com:
     issuer-url: https://accounts.google.com
@@ -26,7 +27,8 @@ oidc-issuers:
   https://agent.buildkite.com:
     issuer-url: https://agent.buildkite.com
     client-id: sigstore
-    type: buildkite-job
+    type: ci-provider
+    ci-provider: *buildkite-type
     contact: support@buildkite.com
     description: "Buildkite Agent OIDC tokens for job identity"
   https://allow.pub:
@@ -169,3 +171,7 @@ ci-issuer-metadata:
         build-config-uri: "{{if .platform_url}}{{.platform_ur}}{{ else }}{{.url}}{{end}}/api/pipelines/{{ .pipeline_id }}"
         run-invocation-uri: "{{if .platform_url}}{{.platform_ur}}{{ else }}{{.url}}{{end}}/build/{{ .workflow_id }}"
     subject-alternative-name-template: "{{if .platform_url}}{{.platform_ur}}{{ else }}{{.url}}{{end}}/{{.account_name}}/{{.pipeline_name}}:{{.account_id}}/{{.pipeline_id}}"
+  *buildkite-type:
+    default-template-values:
+        url: "https://buildkite.com"
+    subject-alternative-name-template: "{{.url}}/{{.organization_slug}}/{{.pipeline_slug}}"
