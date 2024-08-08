@@ -92,3 +92,13 @@ jobs:
         run: |
           set -e
           go test -timeout 30s -run ^TestLoadFulcioConfig$ github.com/sigstore/fulcio/pkg/config
+  
+  signing:
+    name: signing
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: sigstore/gh-action-sigstore-python@v3.0.0
+        with:
+          inputs: main.go
