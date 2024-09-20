@@ -26,7 +26,9 @@ jobs:
     name: build
     runs-on: ubuntu-latest
 
-    if: github.repository == 'sigstore/fulcio'
+    if: github.repository == 'javanlacerda/fulcio'
+    env:
+      GH_TOKEN: ${{ github.token }}
 
     permissions:
       id-token: write
@@ -50,14 +52,21 @@ jobs:
 
       - uses: ko-build/setup-ko@3aebd0597dc1e9d1a26bcfdb7cbeb19c131d3037 # v0.7
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/auth@62cf5bd3e4211a0a0b51f2c6d6a37129d828611d # v2.1.5
-        with:
-          workload_identity_provider: 'projects/498091336538/locations/global/workloadIdentityPools/githubactions/providers/sigstore-fulcio'
-          service_account: 'github-actions-fulcio@projectsigstore.iam.gserviceaccount.com'
 
-      - name: creds
-        run: gcloud auth configure-docker --quiet
+      - name: Formatted label for breaking change
+        id: breaking_change
+        run: |
+          # Get the pull request number associated with the current commit and the 'breaking-change' label
+          BRANCH_NUMBER=$(gh pr list --state all --search "sha:$GITHUB_SHA" | awk '{print $1}')
+          echo "Branch Number: $BRANCH_NUMBER" 
+
+          # Check if a pull request number was found
+          if [ -n "$BRANCH_NUMBER" ]; then
+            echo "FORMATED_LABEL=--image-label breaking-change=true" >> $GITHUB_OUTPUT
+          else
+            echo "FORMATED_LABEL=" >> $GITHUB_OUTPUT 
+          fi
 
       - name: container
-        run: KO_PREFIX=gcr.io/projectsigstore/fulcio/ci/fulcio make sign-keyless-ci
+        run: |
+          KO_PREFIX=gcr.io/projectsigstore/fulcio/ci/fulcio FORMATED_LABEL=${{ steps.breaking_change.outputs.FORMATED_LABEL }} make sign-keyless-ci
