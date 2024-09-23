@@ -61,12 +61,15 @@ jobs:
           echo "Branch Number: $BRANCH_NUMBER" 
 
           # Check if a pull request number was found
-          if [ -n "$BRANCH_NUMBER" ]; then
-            echo "FORMATED_LABEL=--image-label breaking-change=true" >> $GITHUB_OUTPUT
+          if [ ! -n "$BRANCH_NUMBER" ]; then
+            FORMATED_LABEL="FORMATED_LABEL=--image-label breaking-change=true"
           else
-            echo "FORMATED_LABEL=" >> $GITHUB_OUTPUT 
+            FORMATED_LABEL="FORMATED_LABEL=" >> $GITHUB_OUTPUT 
           fi
+          echo "Formated Label: $FORMATED_LABEL"
+          echo $FORMATED_LABEL >> $GITHUB_OUTPUT
 
       - name: container
         run: |
+          echo "Formated Label: ${{ steps.breaking_change.outputs.FORMATED_LABEL }}"
           KO_PREFIX=gcr.io/projectsigstore/fulcio/ci/fulcio FORMATED_LABEL=${{ steps.breaking_change.outputs.FORMATED_LABEL }} make sign-keyless-ci
