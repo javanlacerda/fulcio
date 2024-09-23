@@ -55,7 +55,7 @@ jobs:
       - name: Formatted labels
         id: labels
         run: |
-          FORMATED_LABELS="FORMATED_LABELS='--image-label commit-hash=$GITHUB_SHA'"
+          FORMATED_LABELS="--image-label commit-hash=$GITHUB_SHA"
 
           BRANCH_NUMBER=$(gh pr list --state all --search "sha:$GITHUB_SHA" | awk '{print $1}')
           echo "Branch Number: $BRANCH_NUMBER" 
@@ -64,7 +64,7 @@ jobs:
           if [ -n "$BRANCH_NUMBER" ]; then
             FORMATED_LABELS+=" --image-label breaking-change=true"
           fi
-          echo $FORMATED_LABELS >> $GITHUB_OUTPUT
+          echo "FORMATED_LABELS='$FORMATED_LABELS'" >> $GITHUB_OUTPUT
 
       - name: container
         run: |
