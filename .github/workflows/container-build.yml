@@ -61,7 +61,7 @@ jobs:
           echo "Branch Number: $BRANCH_NUMBER" 
 
           # Check if a pull request number was found
-          if [ ! -n "$BRANCH_NUMBER" ]; then
+          if [ -n "$BRANCH_NUMBER" ]; then
             FORMATED_LABEL="FORMATED_LABEL=--image-label breaking-change=true"
           else
             FORMATED_LABEL="FORMATED_LABEL=" >> $GITHUB_OUTPUT 
