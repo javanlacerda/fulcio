@@ -56,7 +56,6 @@ jobs:
       - name: Formatted label for breaking change
         id: breaking_change
         run: |
-          # Get the pull request number associated with the current commit and the 'breaking-change' label
           BRANCH_NUMBER=$(gh pr list --state all --search "sha:$GITHUB_SHA" | awk '{print $1}')
           echo "Branch Number: $BRANCH_NUMBER" 
 
