@@ -66,6 +66,7 @@ jobs:
           else
             echo "FORMATED_LABEL=" >> $GITHUB_OUTPUT 
           fi
+          echo "Formated Label: $FORMATED_LABEL"
 
       - name: container
         run: |
