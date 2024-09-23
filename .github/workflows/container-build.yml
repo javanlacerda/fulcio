@@ -52,28 +52,12 @@ jobs:
 
       - uses: ko-build/setup-ko@3aebd0597dc1e9d1a26bcfdb7cbeb19c131d3037 # v0.7
 
-
-      - name: Formatted label for breaking change
-        id: breaking_change
-        run: |
-          # Get the pull request number associated with the current commit and the 'breaking-change' label
-          BRANCH_NUMBER=$(gh pr list --state all --search "sha:$GITHUB_SHA" | awk '{print $1}')
-          echo "Branch Number: $BRANCH_NUMBER" 
-
-          # Check if a pull request number was found
-          if [ -n "$BRANCH_NUMBER" ]; then
-            FORMATED_LABEL="FORMATED_LABEL='--image-label breaking-change=true'"
-          else
-            FORMATED_LABEL="FORMATED_LABEL=" >> $GITHUB_OUTPUT 
-          fi
-          echo $FORMATED_LABEL >> $GITHUB_OUTPUT
-
       - name: Formatted labels
         id: labels
         run: |
-          FORMATED_LABELS="FORMATED_LABELS='--image-label commit-hash=$GITHUB_SHA"
+          FORMATED_LABELS="FORMATED_LABELS='--image-label commit-hash=$GITHUB_SHA'"
 
-          BRANCH_NUMBER=$(gh pr list --state all --search "sha:$GITHUB_SHA" --label "breaking-change" | awk '{print $1}')
+          BRANCH_NUMBER=$(gh pr list --state all --search "sha:$GITHUB_SHA" | awk '{print $1}')
           echo "Branch Number: $BRANCH_NUMBER" 
 
           # Check if a pull request number was found
