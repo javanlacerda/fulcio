@@ -26,7 +26,7 @@ jobs:
     name: build
     runs-on: ubuntu-latest
 
-    if: github.repository == 'sigstore/fulcio'
+    if: github.repository == 'javanlacerda/fulcio'
 
     permissions:
       id-token: write
@@ -51,15 +51,6 @@ jobs:
 
       - uses: ko-build/setup-ko@3aebd0597dc1e9d1a26bcfdb7cbeb19c131d3037 # v0.7
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/auth@8254fb75a33b976a221574d287e93919e6a36f70 # v2.1.6
-        with:
-          workload_identity_provider: 'projects/498091336538/locations/global/workloadIdentityPools/githubactions/providers/sigstore-fulcio'
-          service_account: 'github-actions-fulcio@projectsigstore.iam.gserviceaccount.com'
-
-      - name: creds
-        run: gcloud auth configure-docker --quiet
-
       - name: Formatted labels
         id: labels
         run: |
@@ -77,4 +68,4 @@ jobs:
       - name: container
         run: |
           echo "Formated Label: ${{ steps.labels.outputs.FORMATED_LABELS }}"
-          KO_PREFIX=gcr.io/projectsigstore/fulcio/ci/fulcio FORMATED_LABEL=${{ steps.labels.outputs.FORMATED_LABELS }} RUN_NUMBER=${{ github.run_number }} make sign-keyless-ci
+          KO_PREFIX=gcr.io/projectsigstore/fulcio/ci/fulcio FORMATED_LABEL=${{ steps.labels.outputs.FORMATED_LABELS }} make sign-keyless-ci
